@@ -12,7 +12,7 @@ def normaliser_message(message: str):
 
     print(res)
 
-def chiffrer(message: str, cle: int):
+def chiffrer_string_caesar(message: str, cle: int):
     message = normaliser_message(message)
     mot_chiffre =""
     for i in message:
@@ -30,7 +30,7 @@ def chiffrer(message: str, cle: int):
 
 
 
-def enigma_chiffrer(message: str, cle: int):
+def chiffrer_string_enigma(message: str, cle: int):
     message = normaliser_message(message)
     print(f"longeur de la liset de clé : {len(cle)}")
     print(f"clé : {cle[1]}")
@@ -54,8 +54,28 @@ def enigma_chiffrer(message: str, cle: int):
     print(f"mot chiffre est de {mot_chiffre}")
     return mot_chiffre
 
-    return "allo"
+def chiffrer_fichier_caesar(chemin: str, cle: int):
+    with open("message.txt", "r", encoding="utf-8") as fio:
+        contenu = fio.read()
+        fichier_chiffre=chiffrer_string_caesar(contenu, cle)
+        print(f"Voici le contenu du ficheir : {contenu}")
+        print(f"Voici le fichier chiffre  : {fichier_chiffre}")
 
-#chiffrer("Veni, vidi, vici!", 42)
+
+def chiffrer_fichier_enigma(chemin: str, cle: int):
+    with open(chemin, "r", encoding="utf-8") as fio:
+        contenu = fio.read()
+        fichier_chiffre=chiffrer_string_enigma(contenu, cle)
+        print(f"Voici le contenu du ficheir : {contenu}")
+        print(f"Voici le fichier chiffre  : {fichier_chiffre}")
+
+    with open(r"tests\test_enigma_fichier_encrypte.txt", "w", encoding="utf-8") as fio:
+        fio.write(fichier_chiffre)
+    return fichier_chiffre
+
+
+#chiffrer_string_caesar("Veni, vidi, vici!", 42)
 #print (f"Voici lemot normalisé : {normaliser_message("Épai,s")}")
-#print (f"Le chiffrement de maison devrait être égal à tqrzew : {enigma_chiffrer("MAISON", (7, 16, 9))}")
+#print (f"Le chiffrement de maison devrait être égal à tqrzew : {chiffrer_string_enigma("MAISON", (7, 16, 9))}")
+#chiffrer_fichier_caesar("message.txt",42)
+#chiffrer_fichier_enigma("message.txt",(7, 16, 9))
