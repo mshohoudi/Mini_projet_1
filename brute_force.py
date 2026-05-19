@@ -9,8 +9,7 @@ from time import perf_counter
 def enlever_caracteres_speciaux(mot):
     """
     Supprime les accents et les caractères spéciaux d'une chaîne.
-    Solution recommandée par le professeur.
-    """
+     """
     normalized_word = unicodedata.normalize('NFKD', mot)
     return ''.join([char for char in normalized_word if not unicodedata.combining(char)])
 
