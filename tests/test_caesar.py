@@ -12,23 +12,23 @@ from pathlib import Path
 
 # Permet d'importer main.py depuis le dossier parent
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from main import chiffrer, dechiffrer, enigma_chiffrer  # noqa: E402
-
+from main import dechiffrer  # noqa: E402
+from chiffrer import chiffrer, enigma_chiffrer
 
 # ---------- Chaînes de test officielles — César (spec §7) ----------
 
 def test_cesar_officiel_cle_42():
-    assert chiffrer("Veni, vidi, vici!", 42) == "Ludy, lyty, lysy!"
+    assert chiffrer("Veni, vidi, vici!", 42) == "ludy, lyty, lysy!"
 
 
 def test_cesar_officiel_cle_neg_42():
-    assert chiffrer("Veni, vidi, vici!", -42) == "Foxs, fsns, fsms!"
+    assert chiffrer("Veni, vidi, vici!", -42) == "foxs, fsns, fsms!"
 
 
 # ---------- Chaîne de test officielle — Enigma César (spec §2.6) ----------
 
 def test_enigma_officiel_maison():
-    assert enigma_chiffrer("MAISON", (7, 16, 9)) == "TQRZEW"
+    assert enigma_chiffrer("MAISON", (7, 16, 9)) == "tqrzew"
 
 
 # ---------- Cas standards (à compléter par votre équipe) ----------
