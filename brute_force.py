@@ -5,8 +5,6 @@ import itertools
 from time import perf_counter
 
 
-# NOTE: Ces fonctions doivent être importées du travail de vos coéquipiers
-# from main import dechiffrer, enigma_dechiffrer
 
 def enlever_caracteres_speciaux(mot):
     """
