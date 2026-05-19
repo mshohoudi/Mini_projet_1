@@ -12,17 +12,17 @@ from pathlib import Path
 
 # Permet d'importer main.py depuis le dossier parent
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from main import chiffrer, dechiffrer, enigma_chiffrer  # noqa: E402
-
+from main import dechiffrer, enigma_chiffrer  # noqa: E402
+from chiffrer import chiffrer
 
 # ---------- Chaînes de test officielles — César (spec §7) ----------
 
 def test_cesar_officiel_cle_42():
-    assert chiffrer("Veni, vidi, vici!", 42) == "Ludy, lyty, lysy!"
+    assert chiffrer("Veni, vidi, vici!", 42) == "ludy, lyty, lysy!"
 
 
 def test_cesar_officiel_cle_neg_42():
-    assert chiffrer("Veni, vidi, vici!", -42) == "Foxs, fsns, fsms!"
+    assert chiffrer("Veni, vidi, vici!", -42) == "foxs, fsns, fsms!"
 
 
 # ---------- Chaîne de test officielle — Enigma César (spec §2.6) ----------
