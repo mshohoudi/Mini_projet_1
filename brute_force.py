@@ -35,5 +35,21 @@ def est_francais(texte_dechiffre):
     if score >= 2:
         return True
     return False
+def brute_force_cesar(message_chiffre):
+    """
+    Applique la méthode brute-force pour casser le chiffrement de César.
+    Teste les 26 clés possibles de 0 à 25.
+    """
+    print("Démarrage du brute-force (César)...")
 
+    for cle in range(26):
+        # 1. Tenter de déchiffrer avec la clé actuelle
+        # texte_essai = dechiffrer(message_chiffre, cle)
+        texte_essai = ""
+
+        # 2. Vérifier si le résultat a du sens en français
+        if est_francais(texte_essai):
+            return cle, texte_essai
+
+    return None, "Clé introuvable"
 
