@@ -53,3 +53,23 @@ def brute_force_cesar(message_chiffre):
 
     return None, "Clé introuvable"
 
+def brute_force_enigma(message_chiffre):
+    """
+    Applique la méthode brute-force pour casser Enigma César.
+    Utilise itertools.product pour générer efficacement les 17 576 combinaisons possibles (26^3).
+    """
+    print("Démarrage du brute-force (Enigma César)...")
+
+    # Génération d'un itérateur contenant tous les tuples de clés possibles, de (0, 0, 0) à (25, 25, 25)
+    toutes_les_cles = itertools.product(range(26), repeat=3)
+
+    for cles in toutes_les_cles:
+        # 1. Tenter de déchiffrer avec le tuple de clés actuel
+        # texte_essai = enigma_dechiffrer(message_chiffre, cles)
+        texte_essai = ""
+
+        # 2. Vérifier si le résultat a du sens
+        if est_francais(texte_essai):
+            return cles, texte_essai
+
+    return None, "Clé introuvable"
