@@ -58,7 +58,7 @@ def brute_force_enigma(message_chiffre):
     Applique la méthode brute-force pour casser Enigma César.
     Utilise itertools.product pour générer efficacement les 17 576 combinaisons possibles (26^3).
     """
-    print("Démarrage du brute-force (Enigma César)...")
+    print("Démarrage du brute-force (Enigma)...")
 
     # Génération d'un itérateur contenant tous les tuples de clés possibles, de (0, 0, 0) à (25, 25, 25)
     toutes_les_cles = itertools.product(range(26), repeat=3)
@@ -73,3 +73,30 @@ def brute_force_enigma(message_chiffre):
             return cles, texte_essai
 
     return None, "Clé introuvable"
+
+
+if __name__ == "__main__":
+    # --- SECTION DE TEST ET MESURE DE PERFORMANCE ---
+      # Message de test (à remplacer par le contenu lu depuis un fichier comme message.txt)
+    message_test_cesar = "VBGZ, VBHB, VBWG!"
+
+    # Évaluation des performances pour César
+    tic_cesar = perf_counter()
+    cle_cesar, resultat_cesar = brute_force_cesar(message_test_cesar)
+    toc_cesar = perf_counter()
+
+    if cle_cesar is not None:
+        print(f" Succès César ! Clé trouvée : {cle_cesar}")
+
+    # Affichage du temps d'exécution avec une précision de 4 décimales
+    print(f"Temps d'exécution (César) : {toc_cesar - tic_cesar:.4f} secondes\n")
+
+    # Évaluation des performances pour Enigma César
+    tic_enigma = perf_counter()
+    cles_enigma, resultat_enigma = brute_force_enigma(message_test_cesar)
+    toc_enigma = perf_counter()
+
+    if cles_enigma is not None:
+        print(f"Succès Enigma ! Clés trouvées : {cles_enigma}")
+
+    print(f"Temps d'exécution (Enigma) : {toc_enigma - tic_enigma:.4f} secondes\n")
