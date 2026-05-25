@@ -137,7 +137,7 @@ if __name__ == "__main__":
     print("-" * 50 + "\n")
 
     # 2. TEST ENIGMA (Chiffré avec les clés (3, 12, 21))
-    message_test_enigma = "oq nvpjph phm gwod oc ujdyi"
+    message_test_enigma = "oq nhomhf zvf ydzn om wruoh"
 
     tic_enigma = perf_counter()
     cles_enigma, resultat_enigma = brute_force_enigma(message_test_enigma)
