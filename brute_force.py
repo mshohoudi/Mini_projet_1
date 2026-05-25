@@ -1,102 +1,149 @@
-
+import string
 import unicodedata
 import re
 import itertools
 from time import perf_counter
 
+alphabet = string.ascii_lowercase
 
 
-def enlever_caracteres_speciaux(mot):
+# =====================================================================
+# 1. FONCTIONS DE NORMALISATION ET DÉCHIFFREMENT
+# =====================================================================
+
+def normaliser_message(message: str):
     """
-    Supprime les accents et les caractères spéciaux d'une chaîne.
-     """
-    normalized_word = unicodedata.normalize('NFKD', mot)
-    return ''.join([char for char in normalized_word if not unicodedata.combining(char)])
-
-
-def est_francais(texte_dechiffre):
+    Supprime les accents et convertit en minuscules.
     """
-    Vérifie si le texte déchiffré est un texte français valide de manière autonome.
-    Utilise une approche basée sur la fréquence des mots courants.
+    mot_normalise = unicodedata.normalize('NFKD', message)
+    mot_normalise = ''.join([c for c in mot_normalise if not unicodedata.combining(c)])
+    return mot_normalise.lower()
+
+
+def dechiffrer_string_caesar(message: str, cle: int):
     """
-    texte_propre = enlever_caracteres_speciaux(texte_dechiffre.upper())
+    Déchiffre un message César en utilisant la logique de l'équipe.
+    """
+    message_propre = normaliser_message(message)
+    mot_dechiffre = ""
+    for i in message_propre:
+        if i.isalpha() and i in alphabet:
+            position = alphabet.find(i)
+            lettre_dechiffre = alphabet[(position - cle) % 26]
+            mot_dechiffre += lettre_dechiffre
+        else:
+            mot_dechiffre += i
+    return mot_dechiffre
 
-    # Extraction des mots purs (ignorer la ponctuation comme les virgules, points, etc.) à l'aide de Regex
-    mots_texte = re.findall(r'\b[A-Z]+\b', texte_propre)
 
-    # Utilisation d'un ensemble (Set) au lieu d'une liste (List) pour une complexité de recherche O(1)
-    mots_courants = {"LE", "LA", "LES", "ET", "DE", "DU", "UN", "UNE", "EST", "QUE", "DANS", "POUR"}
+def dechiffrer_string_enigma(message: str, cles: tuple):
+    """
+    Déchiffre un message Enigma César en utilisant la logique de l'équipe.
+    """
+    message_propre = normaliser_message(message)
+    mot_dechiffre = ""
+    index_cle = 0
+    for i in message_propre:
+        if i.isalpha() and i in alphabet:
+            position = alphabet.find(i)
+            lettre_dechiffre = alphabet[(position - cles[index_cle]) % 26]
+            mot_dechiffre += lettre_dechiffre
 
-    # Calcul du nombre d'occurrences des mots courants dans le texte testé
+            # Gestion de l'index de la clé
+            index_cle += 1
+            if index_cle == len(cles):
+                index_cle = 0
+        else:
+            mot_dechiffre += i
+    return mot_dechiffre
+
+
+# =====================================================================
+# 2. LOGIQUE DU BRUTE-FORCE ET DÉTECTION DU FRANÇAIS
+# =====================================================================
+
+def est_francais(texte_dechiffre: str):
+    """
+    Vérifie si le texte déchiffré est un texte français valide.
+    Recherche basée sur des mots courants en minuscules.
+    """
+    # Extraction des mots purs en minuscules (le texte entrant est déjà normalisé)
+    mots_texte = re.findall(r'\b[a-z]+\b', texte_dechiffre)
+
+    # Dictionnaire de mots courants (Recherche O(1))
+    mots_courants = {"le", "la", "les", "et", "de", "du", "un", "une", "est", "que", "dans", "pour"}
+
+    # Calcul du score
     score = sum(1 for mot in mots_texte if mot in mots_courants)
 
-    # Si au moins 2 mots courants sont trouvés, on considère que le décryptage est réussi
-    # (Ce seuil peut être ajusté en fonction de la longueur moyenne des messages)
+    # Validation (2 mots trouvés suffisent généralement)
     if score >= 2:
         return True
     return False
-def brute_force_cesar(message_chiffre):
+
+
+def brute_force_cesar(message_chiffre: str):
     """
     Applique la méthode brute-force pour casser le chiffrement de César.
-    Teste les 26 clés possibles de 0 à 25.
     """
     print("Démarrage du brute-force (César)...")
 
     for cle in range(26):
-        # 1. Tenter de déchiffrer avec la clé actuelle
-        # texte_essai = dechiffrer(message_chiffre, cle)
-        texte_essai = ""
+        # Déchiffrement avec la clé actuelle
+        texte_essai = dechiffrer_string_caesar(message_chiffre, cle)
 
-        # 2. Vérifier si le résultat a du sens en français
+        # Vérification linguistique
         if est_francais(texte_essai):
             return cle, texte_essai
 
     return None, "Clé introuvable"
 
-def brute_force_enigma(message_chiffre):
+
+def brute_force_enigma(message_chiffre: str):
     """
-    Applique la méthode brute-force pour casser Enigma César.
-    Utilise itertools.product pour générer efficacement les 17 576 combinaisons possibles (26^3).
+    Applique la méthode brute-force pour casser Enigma César (17 576 possibilités).
     """
     print("Démarrage du brute-force (Enigma)...")
 
-    # Génération d'un itérateur contenant tous les tuples de clés possibles, de (0, 0, 0) à (25, 25, 25)
     toutes_les_cles = itertools.product(range(26), repeat=3)
 
     for cles in toutes_les_cles:
-        # 1. Tenter de déchiffrer avec le tuple de clés actuel
-        # texte_essai = enigma_dechiffrer(message_chiffre, cles)
-        texte_essai = ""
+        texte_essai = dechiffrer_string_enigma(message_chiffre, cles)
 
-        # 2. Vérifier si le résultat a du sens
         if est_francais(texte_essai):
             return cles, texte_essai
 
     return None, "Clé introuvable"
 
 
-if __name__ == "__main__":
-    # --- SECTION DE TEST ET MESURE DE PERFORMANCE ---
-      # Message de test (à remplacer par le contenu lu depuis un fichier comme message.txt)
-    message_test_cesar = "VBGZ, VBHB, VBWG!"
+# =====================================================================
+# 3. SECTION DE TEST ET MESURE DE PERFORMANCE
+# =====================================================================
 
-    # Évaluation des performances pour César
+if __name__ == "__main__":
+    # Phrase cible : "le secret est dans la boite"
+
+    # 1. TEST CÉSAR (Chiffré avec la clé 7)
+    message_test_cesar = "sl zljyla lza khuz sh ivpal"
+
     tic_cesar = perf_counter()
     cle_cesar, resultat_cesar = brute_force_cesar(message_test_cesar)
     toc_cesar = perf_counter()
 
     if cle_cesar is not None:
-        print(f" Succès César ! Clé trouvée : {cle_cesar}")
+        print(f"✅ Succès César ! Clé trouvée : {cle_cesar}")
+        print(f"📜 Texte décrypté : {resultat_cesar}")
+    print(f"⏱️ Temps d'exécution (César) : {toc_cesar - tic_cesar:.4f} secondes\n")
+    print("-" * 50 + "\n")
 
-    # Affichage du temps d'exécution avec une précision de 4 décimales
-    print(f"Temps d'exécution (César) : {toc_cesar - tic_cesar:.4f} secondes\n")
+    # 2. TEST ENIGMA (Chiffré avec les clés (3, 12, 21))
+    message_test_enigma = "oq nvpjph phm gwod oc ujdyi"
 
-    # Évaluation des performances pour Enigma César
     tic_enigma = perf_counter()
-    cles_enigma, resultat_enigma = brute_force_enigma(message_test_cesar)
+    cles_enigma, resultat_enigma = brute_force_enigma(message_test_enigma)
     toc_enigma = perf_counter()
 
     if cles_enigma is not None:
-        print(f"Succès Enigma ! Clés trouvées : {cles_enigma}")
-
-    print(f"Temps d'exécution (Enigma) : {toc_enigma - tic_enigma:.4f} secondes\n")
+        print(f"✅ Succès Enigma ! Clés trouvées : {cles_enigma}")
+        print(f"📜 Texte décrypté : {resultat_enigma}")
+    print(f"⏱️ Temps d'exécution (Enigma) : {toc_enigma - tic_enigma:.4f} secondes\n")
