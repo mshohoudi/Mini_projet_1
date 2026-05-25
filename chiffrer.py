@@ -31,6 +31,10 @@ def chiffrer_string_caesar(message: str, cle: int):
 
 
 def chiffrer_string_enigma(message: str, cle: int):
+    if len(cle) !=3:
+        print("Erreur, la clé n'a pas 3 chiffres")
+        return "Erreur, la clé n'a pas 3 chiffres"
+
     message = normaliser_message(message)
     print(f"longeur de la liset de clé : {len(cle)}")
     print(f"clé : {cle[1]}")
@@ -74,8 +78,9 @@ def chiffrer_fichier_enigma(chemin: str, cle: int):
     return fichier_chiffre
 
 
-#chiffrer_string_caesar("Veni, vidi, vici!", 42)
+#chiffrer_string_caesar("Le point de ralliement sera au nord de la ville de Rome avant de passer à l'attaque!", 42)
 #print (f"Voici lemot normalisé : {normaliser_message("Épai,s")}")
 #print (f"Le chiffrement de maison devrait être égal à tqrzew : {chiffrer_string_enigma("MAISON", (7, 16, 9))}")
 #chiffrer_fichier_caesar("message.txt",42)
 #chiffrer_fichier_enigma("message.txt",(7, 16, 9))
+chiffrer_string_enigma("le secret est dans la boite",(3,12,21))
