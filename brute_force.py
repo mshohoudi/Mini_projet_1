@@ -71,13 +71,13 @@ def est_francais(texte_dechiffre: str):
     mots_texte = re.findall(r'\b[a-z]+\b', texte_dechiffre)
 
     # Dictionnaire de mots courants (Recherche O(1))
-    mots_courants = {"le", "la", "les", "et", "de", "du", "un", "une", "est", "que", "dans", "pour"}
+    mots_courants = {"le", "la", "les", "des", "et", "de", "du", "un", "une", "est", "que", "dans", "pour"}
 
     # Calcul du score
     score = sum(1 for mot in mots_texte if mot in mots_courants)
 
     # Validation (2 mots trouvés suffisent généralement)
-    if score >= 2:
+    if score >= max((len(mots_texte)//4.5), 3):
         return True
     return False
 
