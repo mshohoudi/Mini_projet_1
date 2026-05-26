@@ -9,7 +9,7 @@ def normaliser_message(message: str):
     mot_normalise = ''.join([c for c in mot_normalise if not unicodedata.combining(c)])
     return mot_normalise.lower()
 
-
+# ALGORITHMES DE CÉSAR (Clé = Entier)
 def chiffrer(message: str, cle: int):
     # On nettoie le message dès le début
     message_propre = normaliser_message(message)
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     decrypte = dechiffrer(crypte, cle_test)
     print("Test déchiffrement :", decrypte)
     # Résultat attendu : veni, vidi, vici!
-
+#ALGORITHMES ENIGMA (Clé = Tuple de 3 entiers)
 def enigma_dechiffrer(message: str, cle: tuple):
     message_propre = normaliser_message(message)
     resultat = ""
