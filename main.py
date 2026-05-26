@@ -1,6 +1,6 @@
 """
 MGA802 — Mini-Projet A : Chiffrement de César
-Squelette de départ pour votre équipe. (Intégré avec Brute-force)
+Fichier principal contenant toutes les fonctions cryptographiques et le CLI.
 """
 import argparse
 import os
@@ -21,17 +21,11 @@ def normaliser_message(message: str) -> str:
     return mot_normalise.lower()
 
 
-def chiffrer(message: str, cle: int):
-    # TODO: retourner la chaîne chiffrée (type str).
-    # Exigences visibles dans tests/test_caesar.py :
-    # - test_cesar_officiel_cle_42
-    # - test_cesar_officiel_cle_neg_42
-    # - test_cesar_cle_zero_identite
-    # Exemples attendus par les tests :
-    # - chiffrer("Veni, vidi, vici!", 42) -> "Ludy, lyty, lysy!"
-    # - chiffrer("Veni, vidi, vici!", -42) -> "Foxs, fsns, fsms!"
-    # - chiffrer("Tout pareil.", 0) -> "Tout pareil."
+# =====================================================================
+# FONCTIONS DE CHIFFREMENT / DÉCHIFFREMENT
+# =====================================================================
 
+def chiffrer(message: str, cle: int):
     message_propre = normaliser_message(message)
     resultat = ""
     for char in message_propre:
@@ -44,11 +38,6 @@ def chiffrer(message: str, cle: int):
 
 
 def dechiffrer(message: str, cle: int):
-    # TODO: retourner la chaîne déchiffrée (type str).
-    # Exigence visible dans tests/test_caesar.py :
-    # - test_cesar_round_trip
-    # Le test vérifie que dechiffrer(chiffrer(msg, 7), 7) == msg.
-
     message_propre = normaliser_message(message)
     resultat = ""
     for char in message_propre:
@@ -60,13 +49,7 @@ def dechiffrer(message: str, cle: int):
     return resultat
 
 
-def enigma_chiffrer(message: str, cles):
-    # TODO: retourner la chaîne chiffrée Enigma César (type str).
-    # Exigence visible dans tests/test_caesar.py :
-    # - test_enigma_officiel_maison
-    # Exemple attendu par le test :
-    # - enigma_chiffrer("MAISON", (7, 16, 9)) -> "TQRZEW"
-
+def enigma_chiffrer(message: str, cles: tuple):
     message_propre = normaliser_message(message)
     resultat = ""
     idx = 0
@@ -81,7 +64,6 @@ def enigma_chiffrer(message: str, cles):
 
 
 def enigma_dechiffrer(message: str, cles: tuple) -> str:
-    """Fonction ajoutée pour les besoins du brute-force Enigma"""
     message_propre = normaliser_message(message)
     resultat = ""
     idx = 0
@@ -95,13 +77,24 @@ def enigma_dechiffrer(message: str, cles: tuple) -> str:
     return resultat
 
 
-# === FONCTIONS BRUTE-FORCE AJOUTÉES ===
+# =====================================================================
+# FONCTIONS BRUTE-FORCE
+# =====================================================================
 
 def est_francais(texte_dechiffre: str) -> bool:
     mots_texte = re.findall(r'\b[a-z]+\b', texte_dechiffre)
-    mots_courants = {"le", "la", "les", "et", "de", "du", "un", "une", "est", "que", "dans", "pour"}
+    total_mots = len(mots_texte)
+
+    if total_mots == 0:
+        return False
+
+    mots_courants = {"le", "la", "les", "et", "de", "du", "un", "une", "est", "que", "dans", "pour", "au", "des", "qui",
+                     "sur"}
     score = sum(1 for mot in mots_texte if mot in mots_courants)
-    return score >= 3
+
+    # Seuil dynamique : min 3 mots, ou ~22% pour les longs textes
+    seuil = max(3, int(total_mots / 4.5))
+    return score >= seuil
 
 
 def brute_force_cesar(message_chiffre: str):
@@ -121,12 +114,14 @@ def brute_force_enigma(message_chiffre: str):
     return None, "Clé introuvable"
 
 
+# =====================================================================
+# CLI (LIGNE DE COMMANDE)
+# =====================================================================
+
 def _parse_cle(texte: str):
     """Convertit l'argument --cle en clé utilisable."""
-    # S'il n'y a pas de clé (cas du bruteforce), on retourne None
     if texte is None:
         return None
-
     if "-" in texte.lstrip("-"):
         return tuple(int(x) for x in texte.split("-"))
     return int(texte)
@@ -137,25 +132,22 @@ def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Mini-Projet A : chiffrement de César / Enigma César.")
 
-    # Ajout de 'bruteforce' aux choix possibles
     parser.add_argument(
         "action",
         choices=["chiffrer", "dechiffrer", "enigma", "bruteforce"],
         help="Opération à effectuer (chiffrer, dechiffrer, enigma ou bruteforce).")
 
-    # Mise à jour de la description pour inclure la lecture de fichier
     parser.add_argument(
         "message",
         help="Texte à traiter OU chemin vers un fichier texte (.txt).")
 
-    # required passé à False pour permettre au bruteforce de fonctionner sans clé
     parser.add_argument(
         "-c", "--cle", required=False,
         help="Clé : un entier (ex. '42') ou 'a-b-c' (ex. '7-16-9') pour Enigma.")
 
     args = parser.parse_args(argv)
 
-    # === LECTURE DE FICHIER (TODO Complété) ===
+    # === LECTURE DE FICHIER ===
     contenu_message = args.message
     if os.path.isfile(args.message):
         with open(args.message, "r", encoding="utf-8") as fio:
@@ -182,7 +174,6 @@ def main(argv=None):
             resultat = enigma_chiffrer(contenu_message, cle)
 
     elif args.action == "bruteforce":
-        # === MODE BRUTE-FORCE (TODO Complété) ===
         resultat = "🚀 Lancement du Brute-Force...\n"
 
         tic = perf_counter()
@@ -202,7 +193,6 @@ def main(argv=None):
             else:
                 resultat += "❌ Impossible de décrypter le message."
 
-    # Afficher le résultat (conservé tel quel)
     print(resultat)
 
 
