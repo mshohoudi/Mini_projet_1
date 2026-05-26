@@ -45,20 +45,23 @@ python main.py dechiffrer "erqmrxu" -c 3
 ```
 ### Chiffrer Énigma
 ```
-python main.py enigma "bonjour" -c 7-16-9
+python main.py enigma_chiffrer "bonjour" -c 7-16-9
 ```
 ### Déchiffrer Énigma
+```
+python main.py enigma_dechiffrer "iewqedy" -c 7-16-9
+```
 
-### Brute force César
-
-### Brute force Énigma
-
+### Brute force César et Énigma
+```
+python main.py bruteforce "qh otlmy gd wdkqldrhmy vdwd zz qnwg cj oz alkqh cj unrh zadmy gd udrxhq f o'zywzvxd!"
+```
 
 ## Fonctions actuellement supportées
-- Chiffrement César d'un message ou d'un fichhier texte
-- Déchiffrement César d'un message ou d'un fichhier texte
-- Chiffrement Énigma César d'un message ou d'un fichhier texte
-- Déchiffrement Énigma César d'un message ou d'un fichhier texte
+- Chiffrement César d'un message ou d'un fichier texte
+- Déchiffrement César d'un message ou d'un fichier texte
+- Chiffrement Énigma César d'un message ou d'un fichier texte
+- Déchiffrement Énigma César d'un message ou d'un fichier texte
 - Brute force d'une message en César
 - Brute force d'une message en Énigma César
 
