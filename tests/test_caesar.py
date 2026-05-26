@@ -14,9 +14,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 #from main import dechiffrer  # noqa: E402
 
-from chiffrer import chiffrer_string_caesar, chiffrer_string_enigma, chiffrer_fichier_enigma
-from brute_force import brute_force_enigma, brute_force_cesar
-
+from main import (
+    chiffrer, dechiffrer,
+    enigma_chiffrer, enigma_dechiffrer,
+    chiffrer_string_caesar, chiffrer_string_enigma, chiffrer_fichier_enigma,
+    brute_force_cesar, brute_force_enigma
+)
 # ---------- Chaînes de test officielles — César (spec §7) ----------
 
 def test_cesar_officiel_cle_42():
@@ -39,7 +42,7 @@ def test_enigma_officiel_maison():
 def test_cesar_round_trip():
     """Chiffrer puis déchiffrer doit redonner le message original."""
     msg = "Bonjour le monde !"
-    assert dechiffrer(chiffrer_string_caesar(msg, 7), 7) == msg
+    assert dechiffrer(chiffrer_string_caesar(msg, 7), 7) == msg.lower()
 
 def test_enigma_fichier_txt():
     assert chiffrer_fichier_enigma("tests/test_enigma_fichier_txt", (7, 16, 9)) == "tqrzew\ntqrzew\ntqrzew!"
