@@ -25,7 +25,7 @@ def normaliser_message(message: str) -> str:
 # FONCTIONS DE CHIFFREMENT / DÉCHIFFREMENT
 # =====================================================================
 
-def chiffrer(message: str, cle: int):
+def chiffrer(message: str, cle: int) -> str:
     message_propre = normaliser_message(message)
     resultat = ""
     for char in message_propre:
@@ -37,7 +37,7 @@ def chiffrer(message: str, cle: int):
     return resultat
 
 
-def dechiffrer(message: str, cle: int):
+def dechiffrer(message: str, cle: int) -> str:
     message_propre = normaliser_message(message)
     resultat = ""
     for char in message_propre:
@@ -49,7 +49,11 @@ def dechiffrer(message: str, cle: int):
     return resultat
 
 
-def enigma_chiffrer(message: str, cles: tuple):
+def enigma_chiffrer(message: str, cles: tuple) -> str:
+    # CORRECTIF : validation de la longueur de la clé
+    if len(cles) != 3:
+        return "Erreur, la clé n'a pas 3 chiffres"
+
     message_propre = normaliser_message(message)
     resultat = ""
     idx = 0
@@ -64,6 +68,10 @@ def enigma_chiffrer(message: str, cles: tuple):
 
 
 def enigma_dechiffrer(message: str, cles: tuple) -> str:
+    # CORRECTIF : validation de la longueur de la clé
+    if len(cles) != 3:
+        return "Erreur, la clé n'a pas 3 chiffres"
+
     message_propre = normaliser_message(message)
     resultat = ""
     idx = 0
@@ -77,22 +85,51 @@ def enigma_dechiffrer(message: str, cles: tuple) -> str:
     return resultat
 
 
+# CORRECTIF : nouvelle fonction pour chiffrer un fichier avec Enigma
+def chiffrer_fichier_enigma(chemin_fichier: str, cles: tuple) -> str:
+    """Lit un fichier texte et le chiffre avec Enigma César."""
+    if len(cles) != 3:
+        return "Erreur, la clé n'a pas 3 chiffres"
+
+    with open(chemin_fichier, "r", encoding="utf-8") as f:
+        contenu = f.read()
+
+    # Chiffrer ligne par ligne pour conserver les sauts de ligne
+    lignes = contenu.split("\n")
+    lignes_chiffrees = [enigma_chiffrer(ligne, cles) for ligne in lignes]
+    return "\n".join(lignes_chiffrees)
+
+
 # =====================================================================
 # FONCTIONS BRUTE-FORCE
 # =====================================================================
 
+MOTS_COURANTS_FR = {
+    "le", "la", "les", "et", "de", "du", "un", "une", "est", "que",
+    "dans", "pour", "au", "des", "qui", "sur", "en", "il", "ils",
+    "leur", "leurs", "par", "pas", "plus", "se", "ce", "sont",
+    "nous", "vous", "on", "mais", "ou", "donc", "car", "ni", "or",
+    "avant", "apres", "avec", "sans", "sous", "vers", "entre", "sa",
+    "ses", "mon", "ma", "mes", "ton", "ta", "tes", "cette", "cet",
+    "nord", "sud", "ville", "point", "passer", "sera", "nord"
+}
+
+
+def score_francais(texte: str) -> float:
+    """Retourne le ratio de mots français courants (entre 0 et 1)."""
+    mots = re.findall(r'\b[a-z]+\b', texte)
+    if not mots:
+        return 0.0
+    hits = sum(1 for m in mots if m in MOTS_COURANTS_FR)
+    return hits / len(mots)
+
+
 def est_francais(texte_dechiffre: str) -> bool:
     mots_texte = re.findall(r'\b[a-z]+\b', texte_dechiffre)
     total_mots = len(mots_texte)
-
     if total_mots == 0:
         return False
-
-    mots_courants = {"le", "la", "les", "et", "de", "du", "un", "une", "est", "que", "dans", "pour", "au", "des", "qui",
-                     "sur"}
-    score = sum(1 for mot in mots_texte if mot in mots_courants)
-
-    # Seuil dynamique : min 3 mots, ou ~22% pour les longs textes
+    score = sum(1 for mot in mots_texte if mot in MOTS_COURANTS_FR)
     seuil = max(3, int(total_mots / 4.5))
     return score >= seuil
 
@@ -104,14 +141,47 @@ def brute_force_cesar(message_chiffre: str):
             return cle, texte_essai
     return None, "Clé introuvable"
 
+MOTS_COURANTS_FR = {
+    "le", "la", "les", "et", "de", "du", "un", "une", "est", "que",
+    "dans", "pour", "au", "des", "qui", "sur", "en", "il", "ils",
+    "leur", "leurs", "par", "pas", "plus", "se", "ce", "sont",
+    "nous", "vous", "on", "mais", "ou", "donc", "car", "avant",
+    "avec", "sans", "vers", "sa", "ses", "mon", "ma", "cette",
+    "nord", "sud", "ville", "point", "sera"
+}
+
+def score_francais(texte: str) -> float:
+    mots = re.findall(r'\b[a-z]+\b', texte)
+    if not mots:
+        return 0.0
+    hits = sum(1 for m in mots if m in MOTS_COURANTS_FR)
+    return hits / len(mots)
 
 def brute_force_enigma(message_chiffre: str):
+    """Retourne la clé avec le meilleur score français (pas juste la première)."""
     toutes_les_cles = itertools.product(range(26), repeat=3)
+    meilleur_score = 0.0
+    meilleur_cles = None
+    meilleur_texte = None
+
     for cles in toutes_les_cles:
         texte_essai = enigma_dechiffrer(message_chiffre, cles)
-        if est_francais(texte_essai):
-            return cles, texte_essai
+        s = score_francais(texte_essai)
+        if s > meilleur_score:
+            meilleur_score = s
+            meilleur_cles = cles
+            meilleur_texte = texte_essai
+
+    if meilleur_score >= 0.20:
+        return meilleur_cles, meilleur_texte
     return None, "Clé introuvable"
+
+
+# =====================================================================
+# ALIAS — compatibilité avec les noms utilisés dans les tests
+# =====================================================================
+chiffrer_string_caesar = chiffrer
+chiffrer_string_enigma = enigma_chiffrer
 
 
 # =====================================================================
@@ -119,12 +189,17 @@ def brute_force_enigma(message_chiffre: str):
 # =====================================================================
 
 def _parse_cle(texte: str):
-    """Convertit l'argument --cle en clé utilisable."""
     if texte is None:
         return None
-    if "-" in texte.lstrip("-"):
-        return tuple(int(x) for x in texte.split("-"))
-    return int(texte)
+    # Découper sur le tiret qui suit un chiffre (séparateur Enigma)
+    parties = re.split(r'(?<=\d)-', texte)
+    if len(parties) == 3:
+        return tuple(int(x) for x in parties)
+    if len(parties) == 1:
+        return int(texte)
+    # Si 2 parties → clé Enigma incomplète, on laisse passer pour que
+    # enigma_chiffrer lève l'erreur "n'a pas 3 chiffres"
+    return tuple(int(x) for x in parties)
 
 
 def main(argv=None):
@@ -134,8 +209,8 @@ def main(argv=None):
 
     parser.add_argument(
         "action",
-        choices=["chiffrer", "dechiffrer", "enigma", "bruteforce"],
-        help="Opération à effectuer (chiffrer, dechiffrer, enigma ou bruteforce).")
+        choices=["chiffrer", "dechiffrer", "enigma_chiffrer", "enigma_dechiffrer", "bruteforce"],
+        help="Opération à effectuer.")
 
     parser.add_argument(
         "message",
@@ -167,11 +242,17 @@ def main(argv=None):
         else:
             resultat = dechiffrer(contenu_message, cle)
 
-    elif args.action == "enigma":
+    elif args.action == "enigma_chiffrer":
         if cle is None:
-            resultat = "Erreur : Clé manquante pour Enigma."
+            resultat = "Erreur : Clé manquante pour Enigma (chiffrement)."
         else:
             resultat = enigma_chiffrer(contenu_message, cle)
+
+    elif args.action == "enigma_dechiffrer":
+        if cle is None:
+            resultat = "Erreur : Clé manquante pour Enigma (déchiffrement)."
+        else:
+            resultat = enigma_dechiffrer(contenu_message, cle)
 
     elif args.action == "bruteforce":
         resultat = "🚀 Lancement du Brute-Force...\n"
