@@ -76,7 +76,7 @@ def est_francais(texte_dechiffre: str):
     # Calcul du score
     score = sum(1 for mot in mots_texte if mot in mots_courants)
 
-    # Validation (2 mots trouvés suffisent généralement)
+    # Validation (3 mots trouvés suffisent généralement pour les petits texte sinon le critère de mots_texte)//4.5 pour les plus gros texte)
     if score >= max((len(mots_texte)//4.5), 3):
         return True
     return False
